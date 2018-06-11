@@ -1,0 +1,28 @@
+{
+  "name": "logger",
+  "version": "0.1.0",
+  "description": "Wrap my logging tools",
+  "main": "./dist/lib/index.js",
+  "types": "./dist/lib/index.d.ts",
+  "scripts": {
+    "tsc": "node ./node_modules/typescript/bin/tsc -p ./tsconfig.json",
+    "tsc-w": "node ./node_modules/typescript/bin/tsc -w -p ./tsconfig.json",
+    "test": "sudo node dist/test/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garronej/logger.git"
+  },
+  "author": "Joseph Garrone",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^3.1.0",
+    "run-exclusive": "github:garronej/run-exclusive",
+    "scripting-tools": "github:garronej/scripting-tools"
+  },
+  "devDependencies": {
+    "@types/debug": "0.0.30",
+    "@types/node": "^8.9.1",
+    "typescript": "2.7.1"
+  }
+}
