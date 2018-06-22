@@ -26,15 +26,36 @@ process.once("unhandledRejection", error => {
         for( let i = 0; i<6000; i++ ){
 
             debug(`è¤~~=><${i}><=~~éç`);
+
+            await new Promise(resolve=> setTimeout(resolve, 0));
             
         }
 
+        const last_message= "last message";
 
-        await debug("last message");
+        debug(last_message);
 
-        console.log(fs.readFileSync(logfile_path).toString("utf8"));
+
+        const prTerminate= logger.file.terminate();
+
+        debug("never wrote");
+
+        logger.file.log("never").then(()=> { throw new Error("should not resolve") });
+
+        debug("never wrote again");
+
+        await prTerminate;
+
+        //Just to be sure that nothing is wrote
+        await new Promise<void>(resolve=> setTimeout(resolve, 1000));
+
+        const raw= fs.readFileSync(logfile_path).toString("utf8");
+
+        console.assert(raw.endsWith(last_message) + "\n" );
 
         console.assert(fs.statSync(logfile_path).size < max_size + 30);
+
+        console.log(logger.colors.green("PASS 0"));
 
     })();
 

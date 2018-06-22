@@ -25,6 +25,7 @@ export declare namespace file {
      *  enable must be called first.
      */
     let log: (message: any, ...optionalParams: any[]) => Promise<void>;
+    let terminate: () => Promise<void>;
     function enable(logfile_path: string, max_file_size?: number): void;
 }
 export declare namespace colors {

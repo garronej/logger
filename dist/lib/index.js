@@ -129,6 +129,9 @@ var file;
     file.log = function () {
         throw new Error("File logging is not enabled");
     };
+    file.terminate = function () {
+        throw new Error("File logging is not enabled");
+    };
     function enable(logfile_path, max_file_size) {
         var _this = this;
         if (max_file_size === void 0) { max_file_size = 500000; }
@@ -136,44 +139,73 @@ var file;
         current_logfile_size = 0;
         reduce_from = NaN;
         reduce_to = NaN;
-        file.log = runExclusive.build(function () {
+        var buffer_cache = new Buffer(0);
+        var _log = runExclusive.build(function () { return __awaiter(_this, void 0, void 0, function () {
+            var buffer;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        buffer = buffer_cache;
+                        buffer_cache = new Buffer(0);
+                        return [4 /*yield*/, util.promisify(fs.appendFile)(logfile_path, buffer)];
+                    case 1:
+                        _a.sent();
+                        current_logfile_size += buffer.length;
+                        if (!isNaN(reduce_from)) return [3 /*break*/, 2];
+                        if (current_logfile_size >= max_file_size / 4) {
+                            reduce_from = current_logfile_size;
+                        }
+                        return [3 /*break*/, 5];
+                    case 2:
+                        if (!isNaN(reduce_to)) return [3 /*break*/, 3];
+                        if (current_logfile_size >= Math.floor((3 / 4) * max_file_size)) {
+                            reduce_to = current_logfile_size - 1;
+                        }
+                        return [3 /*break*/, 5];
+                    case 3:
+                        if (!(current_logfile_size >= max_file_size)) return [3 /*break*/, 5];
+                        return [4 /*yield*/, reduceFile(logfile_path, current_logfile_size, reduce_from, reduce_to, file.missingPartIndicator)];
+                    case 4:
+                        current_logfile_size = _a.sent();
+                        reduce_to = NaN;
+                        _a.label = 5;
+                    case 5: return [2 /*return*/];
+                }
+            });
+        }); });
+        file.log = function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i] = arguments[_i];
             }
             return __awaiter(_this, void 0, void 0, function () {
-                var buffer;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            buffer = Buffer.from(util.format.apply(util.format, args) + "\n", "utf8");
-                            return [4 /*yield*/, util.promisify(fs.appendFile)(logfile_path, buffer)];
-                        case 1:
-                            _a.sent();
-                            current_logfile_size += buffer.length;
-                            if (!isNaN(reduce_from)) return [3 /*break*/, 2];
-                            if (current_logfile_size >= max_file_size / 4) {
-                                reduce_from = current_logfile_size;
-                            }
-                            return [3 /*break*/, 5];
-                        case 2:
-                            if (!isNaN(reduce_to)) return [3 /*break*/, 3];
-                            if (current_logfile_size >= Math.floor((3 / 4) * max_file_size)) {
-                                reduce_to = current_logfile_size - 1;
-                            }
-                            return [3 /*break*/, 5];
-                        case 3:
-                            if (!(current_logfile_size >= max_file_size)) return [3 /*break*/, 5];
-                            return [4 /*yield*/, reduceFile(logfile_path, current_logfile_size, reduce_from, reduce_to, file.missingPartIndicator)];
-                        case 4:
-                            current_logfile_size = _a.sent();
-                            reduce_to = NaN;
-                            _a.label = 5;
-                        case 5: return [2 /*return*/];
+                    if (!file.isEnabled) {
+                        return [2 /*return*/, new Promise(function (resolve) { })];
                     }
+                    buffer_cache = Buffer.concat([
+                        buffer_cache,
+                        Buffer.from(util.format.apply(util.format, args) + "\n", "utf8")
+                    ]);
+                    if (runExclusive.isRunning(_log)) {
+                        if (runExclusive.getQueuedCallCount(_log) === 0) {
+                            return [2 /*return*/, _log()];
+                        }
+                        else {
+                            return [2 /*return*/, runExclusive.getPrComplete(_log)];
+                        }
+                    }
+                    else {
+                        return [2 /*return*/, _log()];
+                    }
+                    return [2 /*return*/];
                 });
             });
-        });
+        };
+        file.terminate = function () {
+            file.isEnabled = false;
+            return runExclusive.getPrComplete(_log);
+        };
         file.isEnabled = true;
     }
     file.enable = enable;

@@ -99,6 +99,10 @@ export namespace file {
         throw new Error("File logging is not enabled");
     };
 
+    export let terminate= (): Promise<void>=> {
+        throw new Error("File logging is not enabled");
+    }
+
     export function enable(
         logfile_path: string,
         max_file_size = 500000
@@ -110,9 +114,13 @@ export namespace file {
         reduce_from = NaN;
         reduce_to = NaN;
 
-        log = runExclusive.build(async (...args) => {
+        let buffer_cache: Buffer = new Buffer(0);
 
-            const buffer = Buffer.from(util.format.apply(util.format, args) + "\n", "utf8");
+        const _log= runExclusive.build(async ()=> {
+
+            const buffer= buffer_cache;
+
+            buffer_cache= new Buffer(0);
 
             await util.promisify(fs.appendFile)(logfile_path, buffer);
 
@@ -150,6 +158,40 @@ export namespace file {
 
         });
 
+        log = async (...args) => {
+
+            if( !isEnabled ){
+                return new Promise<void>(resolve=>{});
+            }
+
+            buffer_cache = Buffer.concat([
+                buffer_cache,
+                Buffer.from(util.format.apply(util.format, args) + "\n", "utf8")
+            ]);
+
+            if( runExclusive.isRunning(_log) ){
+
+                if( runExclusive.getQueuedCallCount(_log) === 0 ){
+                    return _log();
+                }else{
+                    return runExclusive.getPrComplete(_log);
+                }
+
+            }else{
+
+                return _log();
+
+            }
+
+        };
+
+        terminate= ()=> {
+
+            isEnabled= false;
+
+            return runExclusive.getPrComplete(_log);
+
+        }
 
         isEnabled = true;
 
