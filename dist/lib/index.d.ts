@@ -14,8 +14,9 @@ export declare const log: (message: any, ...optionalParams: any[]) => Promise<vo
  * Provide a method to petty print on stdout and to file is enabled.
  * If namespace is not specified one will be computed based on the caller file name.
  * e.g. "lib/foobar.js"
+ * log_function can be provided to use a custom log instead of the log fnc on the module.
  */
-export declare function debugFactory(namespace?: string, useColors?: boolean): typeof log;
+export declare function debugFactory(namespace?: string, useColors?: boolean, log_function?: typeof console.log): typeof log;
 export declare namespace file {
     /** Readonly */
     let isEnabled: boolean;

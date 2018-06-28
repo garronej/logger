@@ -39,10 +39,12 @@ export const log: (message: any, ...optionalParams: any[]) => Promise<void> =
  * Provide a method to petty print on stdout and to file is enabled.
  * If namespace is not specified one will be computed based on the caller file name.
  * e.g. "lib/foobar.js"
+ * log_function can be provided to use a custom log instead of the log fnc on the module.
  */
 export function debugFactory(
     namespace?: string, 
-    useColors= true
+    useColors= true,
+    log_function?: typeof console.log
 ): typeof log {
 
     if (namespace === undefined) {
@@ -61,12 +63,24 @@ export function debugFactory(
 
     debug.enabled = true;
 
+    if (!!log_function) {
+        debug.log = log_function;
+    }
+
     return (...args) => new Promise(
         (resolve, reject) => {
 
-            debug.log = (...args) => log.apply(null, args)
-                .then(() => resolve())
-                .catch(error => reject(error));
+            if (!log_function) {
+
+                debug.log = (...args) => log.apply(null, args)
+                    .then(() => resolve())
+                    .catch(error => reject(error));
+
+            } else {
+
+                resolve();
+
+            }
 
             debug.apply(null, args);
 
@@ -104,7 +118,7 @@ export namespace file {
         throw new Error("File logging is not enabled");
     };
 
-    export let terminate= (): Promise<void>=> {
+    export let terminate = (): Promise<void> => {
         throw new Error("File logging is not enabled");
     }
 
@@ -121,11 +135,11 @@ export namespace file {
 
         let buffer_cache: Buffer = new Buffer(0);
 
-        const _log= runExclusive.build(async ()=> {
+        const _log = runExclusive.build(async () => {
 
-            const buffer= buffer_cache;
+            const buffer = buffer_cache;
 
-            buffer_cache= new Buffer(0);
+            buffer_cache = new Buffer(0);
 
             await util.promisify(fs.appendFile)(logfile_path, buffer);
 
@@ -165,7 +179,7 @@ export namespace file {
 
         log = async (...args) => {
 
-            if( !isEnabled ){
+            if (!isEnabled) {
                 return Promise.resolve();
             }
 
@@ -174,15 +188,15 @@ export namespace file {
                 Buffer.from(util.format.apply(util.format, args) + "\n", "utf8")
             ]);
 
-            if( runExclusive.isRunning(_log) ){
+            if (runExclusive.isRunning(_log)) {
 
-                if( runExclusive.getQueuedCallCount(_log) === 0 ){
+                if (runExclusive.getQueuedCallCount(_log) === 0) {
                     return _log();
-                }else{
+                } else {
                     return runExclusive.getPrComplete(_log);
                 }
 
-            }else{
+            } else {
 
                 return _log();
 
@@ -190,9 +204,9 @@ export namespace file {
 
         };
 
-        terminate= ()=> {
+        terminate = () => {
 
-            isEnabled= false;
+            isEnabled = false;
 
             return runExclusive.getPrComplete(_log);
 

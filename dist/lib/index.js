@@ -74,8 +74,9 @@ exports.log = function () {
  * Provide a method to petty print on stdout and to file is enabled.
  * If namespace is not specified one will be computed based on the caller file name.
  * e.g. "lib/foobar.js"
+ * log_function can be provided to use a custom log instead of the log fnc on the module.
  */
-function debugFactory(namespace, useColors) {
+function debugFactory(namespace, useColors, log_function) {
     if (useColors === void 0) { useColors = true; }
     if (namespace === undefined) {
         var caller_file_path = scriptLib.get_caller_file_path();
@@ -85,21 +86,29 @@ function debugFactory(namespace, useColors) {
     debug_from_nmp["useColors"] = function () { return useColors; };
     var debug = debug_from_nmp(namespace);
     debug.enabled = true;
+    if (!!log_function) {
+        debug.log = log_function;
+    }
     return function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
         return new Promise(function (resolve, reject) {
-            debug.log = function () {
-                var args = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    args[_i] = arguments[_i];
-                }
-                return exports.log.apply(null, args)
-                    .then(function () { return resolve(); })
-                    .catch(function (error) { return reject(error); });
-            };
+            if (!log_function) {
+                debug.log = function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    return exports.log.apply(null, args)
+                        .then(function () { return resolve(); })
+                        .catch(function (error) { return reject(error); });
+                };
+            }
+            else {
+                resolve();
+            }
             debug.apply(null, args);
         });
     };

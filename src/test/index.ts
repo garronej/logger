@@ -7,6 +7,11 @@ process.once("unhandledRejection", error => { throw error; });
 
 (async () => {
 
+    logger.debugFactory(undefined, undefined, (...args)=> { 
+        process.stdout.write(">>>>>>");
+        console.log.apply(console, args); 
+    })({ "foo": "bar" }, "Hello word" );
+
     const logfile_path = "/tmp/test_logger.log";
 
     await (async ()=> {
