@@ -36,8 +36,6 @@ process.once("unhandledRejection", error => { throw error; });
 
         debug("never wrote");
 
-        logger.file.log("never").then(()=> { throw new Error("should not resolve") });
-
         debug("never wrote again");
 
         await prTerminate;
