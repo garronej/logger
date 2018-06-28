@@ -15,7 +15,7 @@ export declare const log: (message: any, ...optionalParams: any[]) => Promise<vo
  * If namespace is not specified one will be computed based on the caller file name.
  * e.g. "lib/foobar.js"
  */
-export declare function debugFactory(namespace?: string): typeof log;
+export declare function debugFactory(namespace?: string, useColors?: boolean): typeof log;
 export declare namespace file {
     /** Readonly */
     let isEnabled: boolean;
@@ -33,6 +33,4 @@ export declare namespace colors {
     function green(str: string): string;
     function yellow(str: string): string;
 }
-/** Get path of the file that called the function that is evaluating this. */
-export declare function get_caller_file_path(): string;
 export declare function get_module_dir_path(from_dir_path?: string): string;

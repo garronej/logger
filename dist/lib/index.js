@@ -14,8 +14,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -75,12 +75,14 @@ exports.log = function () {
  * If namespace is not specified one will be computed based on the caller file name.
  * e.g. "lib/foobar.js"
  */
-function debugFactory(namespace) {
+function debugFactory(namespace, useColors) {
+    if (useColors === void 0) { useColors = true; }
     if (namespace === undefined) {
-        var caller_file_path = get_caller_file_path();
+        var caller_file_path = scriptLib.get_caller_file_path();
         var module_dir_path = get_module_dir_path(path.dirname(caller_file_path));
         namespace = path.relative(module_dir_path, caller_file_path).replace(/^dist\//, "");
     }
+    debug_from_nmp["useColors"] = function () { return useColors; };
     var debug = debug_from_nmp(namespace);
     debug.enabled = true;
     return function () {
@@ -181,7 +183,7 @@ var file;
             return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     if (!file.isEnabled) {
-                        return [2 /*return*/, new Promise(function (resolve) { })];
+                        return [2 /*return*/, Promise.resolve()];
                     }
                     buffer_cache = Buffer.concat([
                         buffer_cache,
@@ -254,26 +256,6 @@ var colors;
     }
     colors.yellow = yellow;
 })(colors = exports.colors || (exports.colors = {}));
-/** Get path of the file that called the function that is evaluating this. */
-function get_caller_file_path() {
-    var originalFunc = Error.prepareStackTrace;
-    var callerFile;
-    try {
-        var err = new Error();
-        var currentFile = void 0;
-        Error.prepareStackTrace = function (err, stack) { return stack; };
-        currentFile = err.stack.shift().getFileName();
-        while (err.stack.length) {
-            callerFile = err.stack.shift().getFileName();
-            if (currentFile !== callerFile)
-                break;
-        }
-    }
-    catch (e) { }
-    Error.prepareStackTrace = originalFunc;
-    return callerFile;
-}
-exports.get_caller_file_path = get_caller_file_path;
 function get_module_dir_path(from_dir_path) {
     if (from_dir_path === undefined) {
         from_dir_path = path.dirname(get_module_dir_path());

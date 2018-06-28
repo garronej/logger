@@ -3,11 +3,7 @@ import * as logger from "../lib";
 import * as scriptLib from "scripting-tools";
 import * as fs from "fs";
 
-process.once("unhandledRejection", error => {
-
-    throw error;
-
-});
+process.once("unhandledRejection", error => { throw error; });
 
 (async () => {
 

@@ -40,17 +40,22 @@ export const log: (message: any, ...optionalParams: any[]) => Promise<void> =
  * If namespace is not specified one will be computed based on the caller file name.
  * e.g. "lib/foobar.js"
  */
-export function debugFactory(namespace?: string): typeof log {
+export function debugFactory(
+    namespace?: string, 
+    useColors= true
+): typeof log {
 
     if (namespace === undefined) {
 
-        const caller_file_path = get_caller_file_path();
+        const caller_file_path = scriptLib.get_caller_file_path();
 
         const module_dir_path = get_module_dir_path(path.dirname(caller_file_path));
 
         namespace = path.relative(module_dir_path, caller_file_path).replace(/^dist\//, "");
 
     }
+
+    debug_from_nmp["useColors"]= ()=> useColors;
 
     const debug = debug_from_nmp(namespace);
 
@@ -161,7 +166,7 @@ export namespace file {
         log = async (...args) => {
 
             if( !isEnabled ){
-                return new Promise<void>(resolve=>{});
+                return Promise.resolve();
             }
 
             buffer_cache = Buffer.concat([
@@ -243,34 +248,6 @@ export namespace colors {
 
 }
 
-
-/** Get path of the file that called the function that is evaluating this. */
-export function get_caller_file_path(): string {
-
-    let originalFunc = Error.prepareStackTrace;
-
-    let callerFile;
-
-    try {
-        let err: any = new Error();
-        let currentFile;
-
-        Error.prepareStackTrace = function (err, stack) { return stack; };
-
-        currentFile = err.stack!.shift().getFileName();
-
-        while (err.stack.length) {
-            callerFile = err.stack.shift().getFileName();
-
-            if (currentFile !== callerFile) break;
-        }
-    } catch (e) { }
-
-    Error.prepareStackTrace = originalFunc;
-
-    return callerFile;
-
-}
 
 export function get_module_dir_path(from_dir_path?: string): string {
 
