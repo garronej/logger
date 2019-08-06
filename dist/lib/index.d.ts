@@ -1,4 +1,3 @@
-/// <reference types="node" />
 /**
  * To disable logging on stdout, should be enabled in production.
  * Log and debug will only write to the logfile.
