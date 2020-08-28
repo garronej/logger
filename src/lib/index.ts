@@ -133,13 +133,13 @@ export namespace file {
         reduce_from = NaN;
         reduce_to = NaN;
 
-        let buffer_cache: Buffer = new Buffer(0);
+        let buffer_cache: Buffer = Buffer.alloc(0);
 
         const _log = runExclusive.build(async () => {
 
             const buffer = buffer_cache;
 
-            buffer_cache = new Buffer(0);
+            buffer_cache = Buffer.alloc(0);
 
             await util.promisify(fs.appendFile)(logfile_path, buffer);
 

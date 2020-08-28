@@ -150,14 +150,14 @@ var file;
         current_logfile_size = 0;
         reduce_from = NaN;
         reduce_to = NaN;
-        var buffer_cache = new Buffer(0);
+        var buffer_cache = Buffer.alloc(0);
         var _log = runExclusive.build(function () { return __awaiter(_this, void 0, void 0, function () {
             var buffer;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         buffer = buffer_cache;
-                        buffer_cache = new Buffer(0);
+                        buffer_cache = Buffer.alloc(0);
                         return [4 /*yield*/, util.promisify(fs.appendFile)(logfile_path, buffer)];
                     case 1:
                         _a.sent();
