@@ -16,7 +16,7 @@
   "author": "Joseph Garrone",
   "license": "MIT",
   "dependencies": {
-    "debug": "^3.1.0",
+    "debug": "^3.2.7",
     "run-exclusive": "^2.2.14",
     "scripting-tools": "^0.19.13",
     "supports-color": "^5.4.0"
